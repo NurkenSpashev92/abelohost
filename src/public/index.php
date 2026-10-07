@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\CategoryController;
 use App\Controllers\HomeController;
+use App\Controllers\PostController;
 use App\Core\Database\Mysql;
 use App\Core\Logger\FileLogger;
 use App\Exceptions\NotFoundException;
@@ -11,6 +12,7 @@ use App\Repositories\CategoryRepository;
 use App\Repositories\PostRepository;
 use App\Services\BlogService;
 use App\Services\CategoryService;
+use App\Services\PostService;
 use App\Views\BaseViewSet;
 use FastRoute\Dispatcher;
 
@@ -44,6 +46,12 @@ try {
             new CategoryService(
                 new CategoryRepository($pdo),
                 new PostRepository($pdo)
+            ),
+        ),
+        PostController::class => new PostController(
+            new PostService(
+                new PostRepository($pdo),
+                new CategoryRepository($pdo)
             ),
         ),
     };

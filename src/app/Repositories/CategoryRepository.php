@@ -32,4 +32,18 @@ final readonly class CategoryRepository
 
         return $stmt->fetch() ?: null;
     }
+
+    public function findByPost(int $postId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name
+             FROM categories c
+             INNER JOIN category_post cp ON cp.category_id = c.id
+             WHERE cp.post_id = :post_id
+             ORDER BY c.name'
+        );
+        $stmt->execute(['post_id' => $postId]);
+
+        return $stmt->fetchAll();
+    }
 }

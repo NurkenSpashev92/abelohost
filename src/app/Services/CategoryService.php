@@ -24,7 +24,11 @@ final readonly class CategoryService
      */
     public function getCategoryPage(int $categoryId, PostSortEnum $sort, int $page): array
     {
-        $category = $this->categories->find($categoryId) ?? throw new NotFoundException();
+        $category = $this->categories->find($categoryId);
+
+        if ($category === null) {
+            throw new NotFoundException();
+        }
 
         $total = $this->posts->countByCategory($categoryId);
         $pages = max(1, (int)ceil($total / self::PER_PAGE));

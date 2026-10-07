@@ -19,13 +19,8 @@ final class CategoryController extends Controller
      */
     public function show(string $id): string
     {
-        $sort = PostSortEnum::tryFrom((string) filter_input(INPUT_GET, 'sort')) ?? PostSortEnum::Date;
-        $page = filter_input(
-            INPUT_GET,
-            'page',
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
-        ) ?: 1;
+        $sort = PostSortEnum::tryFrom($_GET['sort'] ?? '') ?? PostSortEnum::Date;
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
         $data = $this->categoryService->getCategoryPage((int) $id, $sort, $page);
 
