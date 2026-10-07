@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Core\Logger\FileLogger;
 use App\Exceptions\NotFoundException;
 use App\Views\BaseViewSet;
 use FastRoute\Dispatcher;
@@ -11,36 +12,27 @@ require __DIR__ . '/../vendor/autoload.php';
 $dispatcher = require __DIR__ . '/../app/router.php';
 
 $uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$routeInfo = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $uri);
-
-function renderError(int $code, string $message): void
-{
-    http_response_code($code);
-    echo (new BaseViewSet())->render('errors/error.tpl', [
-        'title' => $code,
-        'code' => $code,
-        'message' => $message,
-    ]);
-}
+$view = new BaseViewSet();
 
 try {
-    switch ($routeInfo[0]) {
-        case Dispatcher::NOT_FOUND:
-            throw new NotFoundException();
+    $route = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $uri);
 
-        case Dispatcher::METHOD_NOT_ALLOWED:
-            header('Allow: ' . implode(', ', $routeInfo[1]));
-            renderError(405, 'Метод не поддерживается');
-            break;
-
-        case Dispatcher::FOUND:
-            [$class, $method] = $routeInfo[1];
-            echo (new $class())->$method(...$routeInfo[2]);
-            break;
+    if ($route[0] !== Dispatcher::FOUND) {
+        throw new NotFoundException();
     }
+
+    [$class, $method] = $route[1];
+    echo (new $class())->$method(...$route[2]);
 } catch (NotFoundException) {
-    renderError(404, 'Страница не найдена');
+    http_response_code(404);
+    echo $view->render('errors/error.tpl', ['code' => 404, 'message' => 'Страница не найдена']);
 } catch (Throwable $e) {
-    error_log((string) $e);
-    renderError(500, 'Внутренняя ошибка сервера');
+    (new FileLogger(__DIR__ . '/../tmp/logs/app.log'))->error($e->getMessage(), [
+        'exception' => $e::class,
+        'file' => $e->getFile() . ':' . $e->getLine(),
+        'uri' => $uri,
+    ]);
+
+    http_response_code(500);
+    echo $view->render('errors/error.tpl', ['code' => 500, 'message' => 'Внутренняя ошибка сервера']);
 }
