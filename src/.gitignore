@@ -1,0 +1,17 @@
+# Composer
+/vendor
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Tests
+/.phpunit.cache
+.phpunit.result.cache
+
+# IDE / OS
+/.idea
+/.vscode
+/.fleet
+.DS_Store
