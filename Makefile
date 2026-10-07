@@ -35,7 +35,7 @@ shell: ## Open bash inside ab_app
 	$(APP) bash
 
 mysql: ## Open mysql client inside ab_mysql
-	$(MYSQL) mysql -uroot -proot blog
+	$(MYSQL) mysql -uroot -proot --default-character-set=utf8mb4 blog
 
 logs: ## Follow logs of all services
 	$(DOCKER_COMP) logs -f
