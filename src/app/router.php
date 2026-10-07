@@ -1,7 +1,10 @@
 <?php
 
+use App\Controllers\Controller;
+
+
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/', function () {
-        echo "hello";
+        echo (new Controller())->index();
     });
 });
