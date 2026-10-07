@@ -2,8 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Controllers\HomeController;
+use App\Core\Database\Mysql;
 use App\Core\Logger\FileLogger;
 use App\Exceptions\NotFoundException;
+use App\Repositories\CategoryRepository;
+use App\Repositories\PostRepository;
+use App\Services\BlogService;
 use App\Views\BaseViewSet;
 use FastRoute\Dispatcher;
 
@@ -21,8 +26,21 @@ try {
         throw new NotFoundException();
     }
 
+    $config = require __DIR__ . '/../app/Core/config.php';
+    $pdo = Mysql::connect($config['mysql']);
+
     [$class, $method] = $route[1];
-    echo (new $class())->$method(...$route[2]);
+
+    $controller = match ($class) {
+        HomeController::class => new HomeController(
+            new BlogService(
+                new CategoryRepository($pdo),
+                new PostRepository($pdo)
+            ),
+        ),
+    };
+
+    echo $controller->$method(...$route[2]);
 } catch (NotFoundException) {
     http_response_code(404);
     echo $view->render('errors/error.tpl', ['code' => 404, 'message' => 'Страница не найдена']);

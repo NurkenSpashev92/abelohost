@@ -6,6 +6,6 @@ namespace App\Controllers;
 
 use App\Views\BaseViewSet;
 
-class Controller extends BaseViewSet
+abstract class Controller extends BaseViewSet
 {
 }
