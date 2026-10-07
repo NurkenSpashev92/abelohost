@@ -8,8 +8,4 @@ use App\Views\BaseViewSet;
 
 class Controller extends BaseViewSet
 {
-    public function index(): string
-    {
-        return "hello world";
-    }
 }

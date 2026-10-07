@@ -15,3 +15,6 @@
 /.vscode
 /.fleet
 .DS_Store
+
+# Smarty compiled templates and cache
+/tmp
