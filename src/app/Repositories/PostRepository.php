@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\PostSortEnum;
 use PDO;
 
 final readonly class PostRepository
@@ -38,5 +39,36 @@ final readonly class PostRepository
         $stmt->execute(['limit' => $limit]);
 
         return $stmt->fetchAll();
+    }
+
+    public function findByCategory(int $categoryId, PostSortEnum $sort, int $limit, int $offset): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT
+                p.id,
+                p.title,
+                p.description,
+                p.views,
+                p.published_at
+             FROM posts p
+             INNER JOIN category_post cp ON cp.post_id = p.id
+             WHERE cp.category_id = :category_id
+             ORDER BY ' . $sort->column() . ' DESC, p.id DESC
+             LIMIT :limit OFFSET :offset'
+        );
+        $stmt->bindValue('category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function countByCategory(int $categoryId): int
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM category_post WHERE category_id = :category_id');
+        $stmt->execute(['category_id' => $categoryId]);
+
+        return (int) $stmt->fetchColumn();
     }
 }

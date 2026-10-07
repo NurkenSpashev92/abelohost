@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\CategoryController;
 use App\Controllers\HomeController;
 use App\Core\Database\Mysql;
 use App\Core\Logger\FileLogger;
@@ -9,6 +10,7 @@ use App\Exceptions\NotFoundException;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PostRepository;
 use App\Services\BlogService;
+use App\Services\CategoryService;
 use App\Views\BaseViewSet;
 use FastRoute\Dispatcher;
 
@@ -34,6 +36,12 @@ try {
     $controller = match ($class) {
         HomeController::class => new HomeController(
             new BlogService(
+                new CategoryRepository($pdo),
+                new PostRepository($pdo)
+            ),
+        ),
+        CategoryController::class => new CategoryController(
+            new CategoryService(
                 new CategoryRepository($pdo),
                 new PostRepository($pdo)
             ),

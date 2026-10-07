@@ -24,4 +24,12 @@ final readonly class CategoryRepository
              ORDER BY c.name'
         )->fetchAll();
     }
+
+    public function find(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT id, name, description FROM categories WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch() ?: null;
+    }
 }
