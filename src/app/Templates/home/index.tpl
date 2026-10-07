@@ -18,7 +18,7 @@
                 {/foreach}
             </div>
         </section>
-    {foreachelse}
+        {foreachelse}
         <div class="empty-state">Статей пока нет.</div>
     {/foreach}
 {/block}

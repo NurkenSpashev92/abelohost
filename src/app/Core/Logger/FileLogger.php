@@ -24,22 +24,7 @@ final readonly class FileLogger implements LoggerInterface
         $this->log('error', $message, $context);
     }
 
-    public function warning(string|Stringable $message, array $context = []): void
-    {
-        $this->log('warning', $message, $context);
-    }
-
-    public function info(string|Stringable $message, array $context = []): void
-    {
-        $this->log('info', $message, $context);
-    }
-
-    public function debug(string|Stringable $message, array $context = []): void
-    {
-        $this->log('debug', $message, $context);
-    }
-
-    public function log(string $level, string|Stringable $message, array $context = []): void
+    private function log(string $level, string|Stringable $message, array $context = []): void
     {
         $line = sprintf('[%s] %s: %s', date('Y-m-d H:i:s'), strtoupper($level), $message);
 

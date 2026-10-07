@@ -13,7 +13,7 @@
         <p class="post-card-text">{$post.description}</p>
         <div class="post-meta">
             <span>{$post.published_at|date_format:'%d.%m.%Y'}</span>
-            <span>{$post.views|plural:'просмотр':'просмотра':'просмотров'}</span>
+            <span>Просмотры: {$post.views}</span>
         </div>
     </div>
 </article>
