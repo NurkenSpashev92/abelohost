@@ -4,6 +4,7 @@
 
 ```bash
 make install   # сборка образов, запуск контейнеров, composer install
+make seed      # заполнить БД тестовыми категориями и статьями
 ```
 
 Сайт: http://localhost:8000/
@@ -17,6 +18,7 @@ make start     # запустить контейнеры
 make stop      # остановить контейнеры
 make shell     # bash в контейнере PHP
 make mysql     # mysql-клиент в контейнере БД
+make seed      # пересоздать тестовые данные (make seed POSTS=100)
 make logs      # логи всех сервисов
 make destroy   # удалить контейнеры и данные БД
 ```

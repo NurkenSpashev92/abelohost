@@ -9,8 +9,9 @@
 | PHP             | 8.2 (FPM)                              | Язык приложения                         |
 | Nginx           | latest                                 | Веб-сервер, проксирует запросы в PHP-FPM |
 | MySQL           | latest                                 | База данных (через PDO)                 |
-| Smarty          | `smarty/smarty`                        | Шаблонизатор                            |
+| Smarty          | `smarty/smarty` 5.x                    | Шаблонизатор                            |
 | FastRoute       | `nikic/fast-route` ^1.3                | Роутинг                                 |
+| Faker           | `fakerphp/faker` ^1.24 (dev)           | Генерация тестовых данных для сидера    |
 | Composer        | latest                                 | Зависимости и PSR-4 автозагрузка        |
 | Xdebug          | 3.x                                    | Отладка (режим `trigger`)               |
 | Docker Compose  | v2                                     | Окружение для разработки                |
@@ -20,29 +21,96 @@
 ```
 src/
 ├── app/
-│   ├── Abstracts/     # базовые классы (Request, модель, подключение к MySQL)
-│   ├── Contracts/     # интерфейсы
-│   ├── Controllers/   # контроллеры
-│   ├── Exceptions/    # исключения
-│   ├── Models/        # модели
-│   ├── Services/      # бизнес-логика
-│   ├── Views/         # рендеринг шаблонов
-│   ├── templates/     # шаблоны
-│   ├── config.php     # настройки подключения к БД
-│   └── router.php     # маршруты
-├── public/
-│   └── index.php      # точка входа
+│   ├── Contracts/              # интерфейсы
+│   │   ├── LoggerInterface.php
+│   │   └── ViewSetInterface.php
+│   ├── Controllers/            # принимают запрос, вызывают сервис, рендерят шаблон
+│   │   ├── Controller.php      # базовый контроллер
+│   │   ├── HomeController.php      # главная
+│   │   ├── CategoryController.php  # страница категории
+│   │   └── PostController.php      # страница статьи
+│   ├── Core/
+│   │   ├── Database/Mysql.php  # создание PDO-подключения
+│   │   ├── Logger/FileLogger.php
+│   │   └── config.php          # настройки подключения к БД
+│   ├── Enums/
+│   │   └── PostSortEnum.php    # варианты сортировки статей
+│   ├── Exceptions/
+│   │   └── NotFoundException.php   # превращается в ответ 404
+│   ├── Repositories/           # SQL-запросы к БД
+│   │   ├── CategoryRepository.php
+│   │   └── PostRepository.php
+│   ├── Seeders/
+│   │   └── BlogSeeder.php      # тестовые категории и статьи (Faker)
+│   ├── Services/               # бизнес-логика страниц
+│   │   ├── BlogService.php     # главная: категории с 3 последними статьями
+│   │   ├── CategoryService.php # категория: сортировка и пагинация
+│   │   └── PostService.php     # статья: просмотры и похожие статьи
+│   ├── Templates/              # Smarty-шаблоны
+│   │   ├── layout.tpl          # общий макет
+│   │   ├── home/index.tpl
+│   │   ├── category/show.tpl
+│   │   ├── post/show.tpl
+│   │   ├── errors/error.tpl
+│   │   └── partials/post-card.tpl  # карточка статьи
+│   ├── Views/
+│   │   └── BaseViewSet.php     # настройка Smarty и рендеринг
+│   └── router.php              # маршруты
+├── bin/
+│   └── seed.php                # запуск сидера: make seed
+├── public/                     # корень веб-сервера
+│   ├── css/app.css
+│   └── index.php               # точка входа: роутинг, сборка зависимостей, обработка ошибок
+├── tmp/                        # кэш Smarty и логи (не в git)
 └── composer.json
 ```
 
 Пространство имён `App\` указывает на `app/` (PSR-4).
 
+### Как обрабатывается запрос
+
+```
+public/index.php → router.php → Controller → Service → Repository → MySQL
+                                     ↓
+                               Smarty-шаблон → HTML
+```
+
+Зависимости передаются через конструкторы и собираются в `public/index.php`.
+
+### Маршруты
+
+| URL | Страница |
+|---|---|
+| `/` | главная: категории с 3 последними статьями |
+| `/category/{id}?sort=date\|views&page=N` | категория с сортировкой и пагинацией |
+| `/post/{id}` | статья и 3 похожие статьи |
+
 ## Запуск
 
 Docker-окружение описано в корне репозитория, инструкции по запуску — в [`../README.md`](../README.md).
 
+## Использование AI
+
+В процессе разработки проекта использовались AI-инструменты как вспомогательные средства для ускорения разработки и проверки решений.
+
+AI использовался для:
+
+* генерации и структурирования README-файлов и технической документации;
+* анализа и оптимизации SQL-запросов;
+* проверки структуры запросов и рекомендаций по работе с MySQL;
+* формирования и улучшения стилей `public/css/app.css`;
+* разработки и улучшения визуальной части frontend;
+* подбора CSS-решений для адаптивной и аккуратной верстки;
+* анализа отдельных участков кода и поиска возможных улучшений.
+
+При этом архитектура приложения, структура слоёв, бизнес-логика, взаимодействие `Controller → Service → Repository`, выбор используемых компонентов и интеграция решений в проект выполнялись и проверялись разработчиком.
+
+AI использовался именно как инструмент разработки и code review, а не как замена пониманию и контролю над кодом.
+
+
 ```bash
-make install
+make install   # сборка и запуск
+make seed      # тестовые данные
 ```
 
 Сайт: http://localhost:8000/

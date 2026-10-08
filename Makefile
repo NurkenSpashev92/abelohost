@@ -4,12 +4,12 @@ DOCKER_COMP = docker compose
 APP = $(DOCKER_COMP) exec ab_app
 MYSQL = $(DOCKER_COMP) exec ab_mysql
 
-.PHONY: help install build rebuild start stop restart destroy composer shell mysql logs
+.PHONY: help install build rebuild start stop restart destroy composer seed shell mysql logs
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
-install: build start composer ## Build, start and install dependencies
+install: build start composer seed ## Build, start and install dependencies
 
 build: ## Build docker images
 	$(DOCKER_COMP) build
@@ -30,6 +30,9 @@ destroy: ## Remove containers, networks and volumes
 
 composer: ## Run composer install inside ab_app
 	$(APP) composer install
+
+seed: ## Fill DB with test categories and posts (make seed POSTS=100)
+	$(APP) php bin/seed.php $(POSTS)
 
 shell: ## Open bash inside ab_app
 	$(APP) bash
