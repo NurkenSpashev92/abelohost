@@ -3,12 +3,12 @@
 {block name="content"}
     <a href="/" class="back-link">&larr; На главную</a>
     <div class="page-header">
-        <h1>{$category.name}</h1>
-        <p class="text-muted fs-5 mb-0">{$category.description}</p>
+        <h1>{$category->name}</h1>
+        <p class="text-muted fs-5 mb-0">{$category->description}</p>
     </div>
     <nav class="segmented" aria-label="Сортировка">
         {foreach $sorts as $s}
-            <a href="/category/{$category.id}?sort={$s->value}" {if $s === $sort}class="active"
+            <a href="/category/{$category->id}?sort={$s->value}" {if $s === $sort}class="active"
                aria-current="true"{/if}>{$s->label()}</a>
         {/foreach}
     </nav>
@@ -28,7 +28,7 @@
             <ul class="pager">
                 <li {if $page <= 1}class="disabled"{/if}>
                     {if $page > 1}
-                        <a href="/category/{$category.id}?sort={$sort->value}&page={$page - 1}" aria-label="Назад">&larr;</a>
+                        <a href="/category/{$category->id}?sort={$sort->value}&page={$page - 1}" aria-label="Назад">&larr;</a>
                     {else}
                         <span>&larr;</span>
                     {/if}
@@ -38,13 +38,13 @@
                         {if $p === $page}
                             <span aria-current="page">{$p}</span>
                         {else}
-                            <a href="/category/{$category.id}?sort={$sort->value}&page={$p}">{$p}</a>
+                            <a href="/category/{$category->id}?sort={$sort->value}&page={$p}">{$p}</a>
                         {/if}
                     </li>
                 {/for}
                 <li {if $page >= $pages}class="disabled"{/if}>
                     {if $page < $pages}
-                        <a href="/category/{$category.id}?sort={$sort->value}&page={$page + 1}" aria-label="Вперёд">&rarr;</a>
+                        <a href="/category/{$category->id}?sort={$sort->value}&page={$page + 1}" aria-label="Вперёд">&rarr;</a>
                     {else}
                         <span>&rarr;</span>
                     {/if}

@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Factories\CategoryFactory;
+use App\Models\Category;
 use PDO;
 
 final readonly class CategoryRepository
 {
-    public function __construct(private PDO $pdo)
-    {
+    public function __construct(
+        private PDO $pdo,
+        private CategoryFactory $factory,
+    ) {
     }
 
+    /**
+     * @return Category[]
+     */
     public function findWithPosts(): array
     {
-        return $this->pdo->query(
+        $rows = $this->pdo->query(
             'SELECT DISTINCT
                 c.id,
                 c.name,
@@ -23,16 +30,22 @@ final readonly class CategoryRepository
              INNER JOIN category_post cp ON cp.category_id = c.id
              ORDER BY c.name'
         )->fetchAll();
+
+        return $this->factory->makeMany($rows);
     }
 
-    public function find(int $id): ?array
+    public function find(int $id): ?Category
     {
         $stmt = $this->pdo->prepare('SELECT id, name, description FROM categories WHERE id = :id');
         $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
 
-        return $stmt->fetch() ?: null;
+        return $row ? $this->factory->make($row) : null;
     }
 
+    /**
+     * @return Category[]
+     */
     public function findByPost(int $postId): array
     {
         $stmt = $this->pdo->prepare(
@@ -44,6 +57,6 @@ final readonly class CategoryRepository
         );
         $stmt->execute(['post_id' => $postId]);
 
-        return $stmt->fetchAll();
+        return $this->factory->makeMany($stmt->fetchAll());
     }
 }

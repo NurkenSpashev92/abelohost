@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\PostSortEnum;
+use App\DTO\CategoryDto;
 use App\Exceptions\NotFoundException;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PostRepository;
@@ -22,30 +22,30 @@ final readonly class CategoryService
     /**
      * @throws NotFoundException
      */
-    public function getCategoryPage(int $categoryId, PostSortEnum $sort, int $page): array
+    public function getCategoryPage(CategoryDto $dto): array
     {
-        $category = $this->categories->find($categoryId);
+        $category = $this->categories->find($dto->id);
 
         if ($category === null) {
             throw new NotFoundException();
         }
 
-        $total = $this->posts->countByCategory($categoryId);
+        $total = $this->posts->countByCategory($dto->id);
         $pages = max(1, (int)ceil($total / self::PER_PAGE));
 
-        if ($page > $pages) {
+        if ($dto->page > $pages) {
             throw new NotFoundException();
         }
 
         return [
             'category' => $category,
             'posts' => $this->posts->findByCategory(
-                $categoryId,
-                $sort,
+                $dto->id,
+                $dto->sort,
                 self::PER_PAGE,
-                ($page - 1) * self::PER_PAGE
+                ($dto->page - 1) * self::PER_PAGE
             ),
-            'page' => $page,
+            'page' => $dto->page,
             'pages' => $pages,
         ];
     }

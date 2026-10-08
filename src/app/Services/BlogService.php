@@ -17,16 +17,17 @@ final readonly class BlogService
 
     public function getCategoriesWithLatestPosts(int $postsPerCategory = 3): array
     {
-        $postsByCategory = [];
-        foreach ($this->posts->findLatestPerCategory($postsPerCategory) as $post) {
-            $postsByCategory[$post['category_id']][] = $post;
-        }
+        $postsByCategory = $this->posts->findLatestPerCategory($postsPerCategory);
 
+        $result = [];
         $categories = $this->categories->findWithPosts();
-        foreach ($categories as &$category) {
-            $category['posts'] = $postsByCategory[$category['id']] ?? [];
+        foreach ($categories as $category) {
+            $result[] = [
+                'category' => $category,
+                'posts' => $postsByCategory[$category->id] ?? [],
+            ];
         }
 
-        return $categories;
+        return $result;
     }
 }

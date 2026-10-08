@@ -7,13 +7,15 @@ use App\Controllers\HomeController;
 use App\Controllers\PostController;
 use App\Core\Database\Mysql;
 use App\Core\Logger\FileLogger;
+use App\Core\Views\BaseViewSet;
 use App\Exceptions\NotFoundException;
+use App\Factories\CategoryFactory;
+use App\Factories\PostFactory;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PostRepository;
 use App\Services\BlogService;
 use App\Services\CategoryService;
 use App\Services\PostService;
-use App\Views\BaseViewSet;
 use FastRoute\Dispatcher;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -33,25 +35,28 @@ try {
     $config = require __DIR__ . '/../app/Core/config.php';
     $pdo = Mysql::connect($config['mysql']);
 
+    $categoryRepository = new CategoryRepository($pdo, new CategoryFactory());
+    $postRepository = new PostRepository($pdo, new PostFactory());
+
     [$class, $method] = $route[1];
 
     $controller = match ($class) {
         HomeController::class => new HomeController(
             new BlogService(
-                new CategoryRepository($pdo),
-                new PostRepository($pdo)
+                $categoryRepository,
+                $postRepository
             ),
         ),
         CategoryController::class => new CategoryController(
             new CategoryService(
-                new CategoryRepository($pdo),
-                new PostRepository($pdo)
+                $categoryRepository,
+                $postRepository
             ),
         ),
         PostController::class => new PostController(
             new PostService(
-                new PostRepository($pdo),
-                new CategoryRepository($pdo)
+                $postRepository,
+                $categoryRepository
             ),
         ),
     };
