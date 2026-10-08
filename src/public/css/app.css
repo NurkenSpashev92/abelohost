@@ -223,7 +223,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, hsl(var(--hue) 70% 85%), hsl(calc(var(--hue) + 40) 60% 70%));
+    background: linear-gradient(135deg, #c7d2fe, #818cf8);
     color: rgba(255, 255, 255, .9);
     font-family: 'Lora', Georgia, serif;
     font-size: 3rem;
