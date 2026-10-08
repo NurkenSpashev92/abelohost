@@ -3,13 +3,13 @@
 Нужны Docker (с Compose v2) и make.
 
 ```bash
-make install   # сборка образов, запуск контейнеров, composer install
-make seed      # заполнить БД тестовыми категориями и статьями
+make install   # .env из .env.example, сборка образов, запуск контейнеров, composer install, тестовые данные
 ```
 
 Сайт: http://localhost:8000/
 MySQL с хоста: `127.0.0.1:3307`, база `blog`, пользователь `root` / `root`.
 Схема БД создаётся из `docker/mysql/dump.sql` при первом запуске (пустой volume).
+Параметры БД задаются в `.env` (создаётся из `.env.example`), их читают и контейнер MySQL, и приложение.
 
 ## Полезные команды
 ```bash

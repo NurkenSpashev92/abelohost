@@ -7,8 +7,8 @@
 | Компонент       | Версия / пакет                         | Назначение                              |
 |-----------------|----------------------------------------|-----------------------------------------|
 | PHP             | 8.2 (FPM)                              | Язык приложения                         |
-| Nginx           | latest                                 | Веб-сервер, проксирует запросы в PHP-FPM |
-| MySQL           | latest                                 | База данных (через PDO)                 |
+| Nginx           | 1.29                                   | Веб-сервер, проксирует запросы в PHP-FPM |
+| MySQL           | 26.7                                   | База данных (через PDO)                 |
 | Smarty          | `smarty/smarty` 5.x                    | Шаблонизатор                            |
 | FastRoute       | `nikic/fast-route` ^1.3                | Роутинг                                 |
 | Faker           | `fakerphp/faker` ^1.24 (dev)           | Генерация тестовых данных для сидера    |
@@ -32,11 +32,20 @@ src/
 │   ├── Core/
 │   │   ├── Database/Mysql.php  # создание PDO-подключения
 │   │   ├── Logger/FileLogger.php
-│   │   └── config.php          # настройки подключения к БД
+│   │   └── config.php          # настройки БД из переменных окружения (.env)
+│   ├── DTO/                    # входные данные запроса (заполняются в контроллере)
+│   │   ├── CategoryDto.php     # id, сортировка, страница
+│   │   └── PostDto.php         # id
 │   ├── Enums/
 │   │   └── PostSortEnum.php    # варианты сортировки статей
 │   ├── Exceptions/
 │   │   └── NotFoundException.php   # превращается в ответ 404
+│   ├── Factories/              # собирают модели из строк БД
+│   │   ├── CategoryFactory.php
+│   │   └── PostFactory.php
+│   ├── Models/                 # Category, Post — то, что возвращают репозитории
+│   │   ├── Category.php
+│   │   └── Post.php
 │   ├── Repositories/           # SQL-запросы к БД
 │   │   ├── CategoryRepository.php
 │   │   └── PostRepository.php
@@ -75,6 +84,7 @@ public/index.php → router.php → Controller → Service → Repository → My
                                Smarty-шаблон → HTML
 ```
 
+Контроллер собирает DTO из запроса и передаёт его в сервис. Репозиторий возвращает модели `Post` / `Category`, созданные фабрикой из строк БД.
 Зависимости передаются через конструкторы и собираются в `public/index.php`.
 
 ### Маршруты

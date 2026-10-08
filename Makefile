@@ -11,13 +11,16 @@ help: ## Show this help
 
 install: build start composer seed ## Build, start and install dependencies
 
-build: ## Build docker images
+.env: ## Create .env from .env.example
+	cp .env.example .env
+
+build: .env ## Build docker images
 	$(DOCKER_COMP) build
 
-rebuild: ## Build docker images without cache
+rebuild: .env ## Build docker images without cache
 	$(DOCKER_COMP) build --no-cache
 
-start: ## Start all services
+start: .env ## Start all services
 	$(DOCKER_COMP) up -d
 
 stop: ## Stop all services
@@ -38,7 +41,7 @@ shell: ## Open bash inside ab_app
 	$(APP) bash
 
 mysql: ## Open mysql client inside ab_mysql
-	$(MYSQL) mysql -uroot -proot --default-character-set=utf8mb4 blog
+	$(MYSQL) sh -c 'mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 "$$MYSQL_DATABASE"'
 
 logs: ## Follow logs of all services
 	$(DOCKER_COMP) logs -f

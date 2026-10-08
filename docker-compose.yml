@@ -11,6 +11,7 @@ services:
       - ./src:/var/www/html
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    env_file: .env
     environment:
       PHP_IDE_CONFIG: serverName=server
     depends_on:
@@ -18,7 +19,7 @@ services:
         condition: service_healthy
 
   ab_nginx:
-    image: nginx:latest
+    image: nginx:1.29
     container_name: ab_nginx
     restart: unless-stopped
     ports:
@@ -30,19 +31,19 @@ services:
       - ab_app
 
   ab_mysql:
-    image: mysql:latest
+    image: mysql:26.7
     container_name: ab_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: blog
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 20
