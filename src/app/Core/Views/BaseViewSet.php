@@ -26,7 +26,7 @@ class BaseViewSet implements ViewSetInterface
     private function getSmarty(): Smarty
     {
         if ($this->smarty === null) {
-            $basePath = dirname(__DIR__, 2);
+            $basePath = dirname(__DIR__, 3);
 
             $this->smarty = new Smarty();
             $this->smarty->setTemplateDir($basePath . '/app/Templates');
