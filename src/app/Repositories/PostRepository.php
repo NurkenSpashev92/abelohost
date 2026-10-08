@@ -5,14 +5,21 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\PostSortEnum;
+use App\Factories\PostFactory;
+use App\Models\Post;
 use PDO;
 
 final readonly class PostRepository
 {
-    public function __construct(private PDO $pdo)
-    {
+    public function __construct(
+        private PDO $pdo,
+        private PostFactory $factory,
+    ) {
     }
 
+    /**
+     * @return array<int, Post[]>
+     */
     public function findLatestPerCategory(int $limit): array
     {
         $stmt = $this->pdo->prepare(
@@ -39,9 +46,17 @@ final readonly class PostRepository
         );
         $stmt->execute(['limit' => $limit]);
 
-        return $stmt->fetchAll();
+        $postsByCategory = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $postsByCategory[$row['category_id']][] = $this->factory->make($row);
+        }
+
+        return $postsByCategory;
     }
 
+    /**
+     * @return Post[]
+     */
     public function findByCategory(int $categoryId, PostSortEnum $sort, int $limit, int $offset): array
     {
         $stmt = $this->pdo->prepare(
@@ -63,7 +78,7 @@ final readonly class PostRepository
         $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $this->factory->makeMany($stmt->fetchAll());
     }
 
     public function countByCategory(int $categoryId): int
@@ -74,7 +89,7 @@ final readonly class PostRepository
         return (int) $stmt->fetchColumn();
     }
 
-    public function find(int $id): ?array
+    public function find(int $id): ?Post
     {
         $stmt = $this->pdo->prepare(
             'SELECT id, title, description, content, image, views, published_at
@@ -82,8 +97,9 @@ final readonly class PostRepository
              WHERE id = :id'
         );
         $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
 
-        return $stmt->fetch() ?: null;
+        return $row ? $this->factory->make($row) : null;
     }
 
     public function incrementViews(int $id): void
@@ -92,6 +108,9 @@ final readonly class PostRepository
         $stmt->execute(['id' => $id]);
     }
 
+    /**
+     * @return Post[]
+     */
     public function findSimilar(int $postId, int $limit): array
     {
         $stmt = $this->pdo->prepare(
@@ -116,6 +135,6 @@ final readonly class PostRepository
         $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $this->factory->makeMany($stmt->fetchAll());
     }
 }

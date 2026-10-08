@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\PostDto;
 use App\Exceptions\NotFoundException;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PostRepository;
@@ -21,20 +22,19 @@ final readonly class PostService
     /**
      * @throws NotFoundException
      */
-    public function getPostPage(int $id): array
+    public function getPostPage(PostDto $dto): array
     {
-        $this->posts->incrementViews($id);
-
-        $post = $this->posts->find($id);
+        $post = $this->posts->find($dto->id);
 
         if ($post === null) {
             throw new NotFoundException();
         }
+        $this->posts->incrementViews($dto->id);
 
         return [
             'post' => $post,
-            'categories' => $this->categories->findByPost($id),
-            'similar' => $this->posts->findSimilar($id, self::SIMILAR_LIMIT),
+            'categories' => $this->categories->findByPost($dto->id),
+            'similar' => $this->posts->findSimilar($dto->id, self::SIMILAR_LIMIT),
         ];
     }
 }
