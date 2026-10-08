@@ -18,7 +18,8 @@ try {
         Factory::create('ru_RU')
     ))->run($postsCount);
 } catch (Throwable $e) {
-    echo "Ошибка запуска seeder ❌🆘‼️" . PHP_EOL;
+    echo STDERR, "Ошибка запуска seeder ❌: {$e->getMessage()}" . PHP_EOL;
+    exit(1);
 }
 
 echo "Готово ❇️: добавлено статей — {$postsCount} ✅" . PHP_EOL;

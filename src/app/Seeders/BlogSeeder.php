@@ -11,6 +11,7 @@ use Throwable;
 final readonly class BlogSeeder
 {
     private const CATEGORIES_COUNT = 6;
+    private const IMAGE_URL = 'https://picsum.photos/seed/%d/800/450';
 
     public function __construct(
         private PDO $pdo,
@@ -64,8 +65,8 @@ final readonly class BlogSeeder
     private function seedPosts(int $count, array $categoryIds): void
     {
         $insertPost = $this->pdo->prepare(
-            'INSERT INTO posts (title, description, content, views, published_at)
-             VALUES (:title, :description, :content, :views, :published_at)'
+            'INSERT INTO posts (title, description, content, image, views, published_at)
+             VALUES (:title, :description, :content, :image, :views, :published_at)'
         );
         $attachCategory = $this->pdo->prepare(
             'INSERT INTO category_post (category_id, post_id) VALUES (:category_id, :post_id)'
@@ -76,6 +77,7 @@ final readonly class BlogSeeder
                 'title' => $this->phrase(50),
                 'description' => $this->faker->realText(150),
                 'content' => $this->content(),
+                'image' => $this->image(),
                 'views' => $this->faker->numberBetween(0, 1000),
                 'published_at' => $this->faker->dateTimeBetween('-1 year')->format('Y-m-d H:i:s'),
             ]);
@@ -88,17 +90,21 @@ final readonly class BlogSeeder
         }
     }
 
+    private function image(): string
+    {
+        return sprintf(self::IMAGE_URL, $this->faker->unique()->numberBetween(1, 100000));
+    }
+
     private function phrase(int $maxLength): string
     {
-        $phrase = str_replace(['«', '»', '"'], '', $this->faker->realText($maxLength));
-
-        return trim($phrase, " \t\n.,;:—-");
+        return rtrim($this->faker->realText($maxLength), '.');
     }
 
     private function content(): string
     {
         $paragraphs = [];
-        for ($i = 0, $count = $this->faker->numberBetween(5, 8); $i < $count; $i++) {
+        $count = $this->faker->numberBetween(5, 8);
+        for ($i = 0; $i < $count; $i++) {
             $paragraphs[] = $this->faker->realText($this->faker->numberBetween(300, 600));
         }
 
