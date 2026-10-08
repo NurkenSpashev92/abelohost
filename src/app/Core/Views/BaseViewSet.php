@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Views;
+namespace App\Core\Views;
 
 use App\Contracts\ViewSetInterface;
 use Smarty\Exception;
